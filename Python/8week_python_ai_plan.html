@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이토치 읽기 8주 플랜</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --accent: #7c6dfa;
+    --accent2: #fa6d9a;
+    --accent3: #6dfacc;
+    --text: #eeeef5;
+    --muted: #888899;
+    --border: rgba(255,255,255,0.07);
+    --keep: #6dfacc;
+    --skip: #444455;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nanum Gothic', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(124,109,250,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,109,250,0.03) 1px, transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+  .container { max-width:860px; margin:0 auto; padding:60px 24px 80px; position:relative; z-index:1; }
+
+  .header { margin-bottom:56px; text-align:center; }
+  .header-eyebrow { font-size:12px; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:16px; font-weight:700; }
+  .header h1 {
+    font-family:'Black Han Sans', sans-serif;
+    font-size:clamp(2rem,6vw,3.2rem);
+    line-height:1.15;
+    margin-bottom:20px;
+    background:linear-gradient(135deg,#fff 0%,var(--accent) 60%,var(--accent2) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .header-desc { font-size:15px; color:var(--muted); line-height:1.8; max-width:520px; margin:0 auto 28px; }
+  .goal-banner {
+    display:inline-flex; align-items:center; gap:10px;
+    background:rgba(124,109,250,0.1); border:1px solid rgba(124,109,250,0.25);
+    border-radius:100px; padding:10px 20px; font-size:13px; color:#b8b0ff;
+  }
+  .goal-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+  .progress-strip { display:flex; gap:4px; margin-bottom:40px; }
+  .progress-seg { height:4px; border-radius:2px; flex:1; background:var(--surface2); transition:background .3s; }
+  .progress-seg.done { background:var(--accent3); }
+  .progress-seg.active { background:var(--accent); }
+
+  .week-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; margin-bottom:12px; overflow:hidden;
+    transition:border-color .2s;
+  }
+  .week-card:hover { border-color:rgba(124,109,250,0.25); }
+
+  .week-header {
+    padding:22px 28px; cursor:pointer;
+    display:flex; align-items:flex-start; gap:18px; user-select:none;
+  }
+  .week-num {
+    font-family:'Black Han Sans', sans-serif; font-size:11px;
+    letter-spacing:0.12em; padding:5px 13px; border-radius:100px;
+    white-space:nowrap; margin-top:2px; flex-shrink:0;
+  }
+  .phase-basics .week-num { background:rgba(109,250,204,0.1); color:var(--accent3); }
+  .phase-func .week-num { background:rgba(124,109,250,0.12); color:#c0b8ff; }
+  .phase-class .week-num { background:rgba(250,109,154,0.12); color:#ffb0cc; }
+  .phase-pytorch .week-num { background:rgba(250,200,100,0.1); color:#ffd080; }
+
+  .week-meta { flex:1; }
+  .week-title { font-family:'Black Han Sans', sans-serif; font-size:1.1rem; margin-bottom:5px; color:var(--text); }
+  .week-subtitle { font-size:13px; color:var(--muted); line-height:1.6; }
+
+  .week-toggle {
+    width:28px; height:28px; border-radius:50%; background:var(--surface2);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:transform .3s, background .2s; margin-top:2px;
+  }
+  .week-toggle svg { width:14px; height:14px; stroke:var(--muted); transition:stroke .2s; }
+  .week-card.open .week-toggle { transform:rotate(180deg); background:rgba(124,109,250,0.15); }
+  .week-card.open .week-toggle svg { stroke:var(--accent); }
+
+  .week-body { display:none; padding:0 28px 28px; }
+  .week-card.open .week-body { display:block; }
+  .divider-line { height:1px; background:var(--border); margin-bottom:22px; }
+
+  .why-box {
+    background:var(--surface2); border-left:3px solid var(--accent);
+    border-radius:0 12px 12px 0; padding:16px 18px; margin-bottom:22px;
+  }
+  .why-label { font-size:10px; letter-spacing:0.15em; color:var(--accent); font-weight:700; text-transform:uppercase; margin-bottom:8px; }
+  .why-text { font-size:14px; color:#cccce0; line-height:1.85; }
+  .why-text strong { color:#eee; }
+  .why-text code { font-family:monospace; color:var(--accent3); font-size:13px; background:rgba(109,250,204,0.07); padding:1px 5px; border-radius:4px; }
+
+  .concept-section { margin-bottom:22px; }
+  .section-label { font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+  .concept-grid { display:flex; flex-wrap:wrap; gap:7px; }
+  .concept-pill {
+    font-size:12px; padding:5px 13px; border-radius:100px;
+    background:rgba(124,109,250,0.09); border:1px solid rgba(124,109,250,0.18);
+    color:#c0b8ff; font-family:monospace;
+  }
+
+  .prob-group { margin-bottom:16px; }
+  .prob-group-title { font-size:11px; color:var(--muted); margin-bottom:9px; font-weight:700; letter-spacing:0.05em; }
+  .prob-links { display:flex; flex-wrap:wrap; gap:7px; }
+  .prob-link {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; font-family:monospace; padding:6px 13px; border-radius:9px;
+    background:rgba(109,250,204,0.07); border:1px solid rgba(109,250,204,0.18);
+    color:var(--keep); text-decoration:none; transition:background .15s, transform .1s;
+  }
+  .prob-link:hover { background:rgba(109,250,204,0.14); transform:translateY(-1px); }
+  .prob-link-arrow { font-size:10px; opacity:.6; }
+
+  .skip-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  .skip-pill {
+    font-size:12px; font-family:monospace; padding:5px 12px; border-radius:8px;
+    background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05);
+    color:var(--skip); text-decoration:line-through;
+  }
+  .skip-reason { font-size:12px; color:#555568; margin-top:7px; line-height:1.7; }
+
+  .pytorch-box {
+    background:linear-gradient(135deg,rgba(250,200,100,0.05),rgba(250,109,154,0.05));
+    border:1px solid rgba(250,200,100,0.13); border-radius:14px; padding:20px; margin-bottom:18px;
+  }
+  .pytorch-label { font-size:10px; letter-spacing:0.15em; color:#ffd080; font-weight:700; text-transform:uppercase; margin-bottom:13px; }
+  .code-block {
+    background:rgba(0,0,0,0.45); border-radius:10px; padding:16px;
+    font-family:monospace; font-size:13px; line-height:1.9; color:#bbb; overflow-x:auto;
+  }
+  .code-kw { color:#b8b0ff; }
+  .code-cls { color:#ffd080; }
+  .code-fn { color:#6dfacc; }
+  .code-cm { color:#555570; }
+
+  .footer { margin-top:56px; text-align:center; font-size:13px; color:#444455; line-height:1.8; }
+
+  @media(max-width:600px){
+    .week-header { padding:16px 16px; gap:12px; }
+    .week-body { padding:0 16px 20px; }
+    .container { padding:36px 14px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">파이토치 코드 읽기 프로젝트</div>
+    <h1>8주 만에<br>AI 코드가 보인다</h1>
+    <p class="header-desc">
+      비전공자도 괜찮아요. 파이토치 코드의 90%는 딱 세 가지로 이루어져 있어요.<br>
+      변수, 함수, 클래스. 이것만 알면 코드가 읽혀요.
+    </p>
+    <div class="goal-banner">
+      <span class="goal-dot"></span>
+      위키독스 파이썬 300제 핵심 107문제 · 주 5일 · 하루 30분
+    </div>
+  </div>
+
+  <div class="progress-strip" id="progressStrip">
+    <div class="progress-seg" data-w="1"></div>
+    <div class="progress-seg" data-w="2"></div>
+    <div class="progress-seg" data-w="3"></div>
+    <div class="progress-seg" data-w="4"></div>
+    <div class="progress-seg" data-w="5"></div>
+    <div class="progress-seg" data-w="6"></div>
+    <div class="progress-seg" data-w="7"></div>
+    <div class="progress-seg" data-w="8"></div>
+  </div>
+
+  <!-- 1주 -->
+  <div class="week-card phase-basics" id="w1">
+    <div class="week-header" onclick="toggle('w1')">
+      <span class="week-num">1주차</span>
+      <div class="week-meta">
+        <div class="week-title">변수 · 문자열 · 리스트 · 딕셔너리</div>
+        <div class="week-subtitle">데이터를 담는 그릇 이해하기 · 22문제</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box">
+        <div class="why-label">왜 배워야 하나요?</div>
+        <div class="why-text">
+          AI가 사진을 인식할 때, 그 사진 속 숫자들은 어딘가에 담겨 있어야 해요.<br>
+          <strong>변수는 숫자 하나를 담는 상자</strong>고, <strong>리스트는 상자 수백 개를 이어붙인 서랍</strong>이에요.<br>
+          파이토치가 이미지를 처리할 때 첫 줄부터 리스트와 딕셔너리가 나와요. 이게 안 보이면 아무것도 안 보여요.
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">반드시 이해해야 할 개념</div>
+        <div class="concept-grid">
+          <span class="concept-pill">x = 10</span>
+          <span class="concept-pill">"문자열"[0]</span>
+          <span class="concept-pill">리스트[1:3]</span>
+          <span class="concept-pill">dict["key"]</span>
+          <span class="concept-pill">f"{변수} 출력"</span>
+          <span class="concept-pill">len(리스트)</span>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">풀 문제 — 클릭하면 바로 이동해요</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://wikidocs.net/7014" target="_blank">001~005 시작하기 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7015" target="_blank">011~015 변수 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7016" target="_blank">021~025 문자열 기초 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7017" target="_blank">031~033 문자열 슬라이싱 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7020" target="_blank">051~055 리스트 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7023" target="_blank">081~085 딕셔너리 <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">건너뛰는 문제</div>
+        <div class="skip-pills">
+          <span class="skip-pill">006~010</span><span class="skip-pill">016~020</span>
+          <span class="skip-pill">034~050</span><span class="skip-pill">056~080</span>
+          <span class="skip-pill">086~100</span>
+        </div>
+        <div class="skip-reason">ljust / rjust / zfill 등 출력 정렬, 튜플 세부 조작 — 파이토치 코드에서 거의 나오지 않아요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2주 -->
+  <div class="week-card phase-basics" id="w2">
+    <div class="week-header" onclick="toggle('w2')">
+      <span class="week-num">2주차</span>
+      <div class="week-meta">
+        <div class="week-title">조건문 · 반복문</div>
+        <div class="week-subtitle">AI가 데이터를 하나씩 처리하는 방법 · 20문제</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box">
+        <div class="why-label">왜 배워야 하나요?</div>
+        <div class="why-text">
+          AI가 10만 장의 사진을 학습할 때 어떻게 할까요? 한 장씩 꺼내서 처리해요.<br>
+          <strong>for 반복문이 바로 그 "한 장씩 꺼내는" 행동이에요.</strong><br>
+          파이토치 학습 코드는 거의 무조건 <code>for epoch in range(100):</code> 으로 시작해요. 이걸 모르면 학습 코드를 한 줄도 못 읽어요.
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">반드시 이해해야 할 개념</div>
+        <div class="concept-grid">
+          <span class="concept-pill">if / elif / else</span>
+          <span class="concept-pill">for i in range(n)</span>
+          <span class="concept-pill">for x in 리스트</span>
+          <span class="concept-pill">enumerate()</span>
+          <span class="concept-pill">중첩 for문</span>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">풀 문제</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://wikidocs.net/7027" target="_blank">101~105 조건문 기초 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7028" target="_blank">111~113 조건문 심화 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7030" target="_blank">131~135 반복문 기초 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7031" target="_blank">141~143 반복+리스트 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7032" target="_blank">151~153 중첩 반복문 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7033" target="_blank">161~162 enumerate <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">건너뛰는 문제</div>
+        <div class="skip-pills">
+          <span class="skip-pill">106~110</span><span class="skip-pill">114~130</span>
+          <span class="skip-pill">136~140</span><span class="skip-pill">144~160</span>
+          <span class="skip-pill">163~200</span>
+        </div>
+        <div class="skip-reason">while 세부 조작, 단순 반복 패턴 연습 문제 — 핵심 개념을 익힌 뒤의 반복 연습용이에요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3주 -->
+  <div class="week-card phase-func" id="w3">
+    <div class="week-header" onclick="toggle('w3')">
+      <span class="week-num">3주차</span>
+      <div class="week-meta">
+        <div class="week-title">함수 기초</div>
+        <div class="week-subtitle">코드를 묶어서 이름 붙이기 · 20문제</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box">
+        <div class="why-label">왜 배워야 하나요?</div>
+        <div class="why-text">
+          레시피를 생각해봐요. 매번 "밀가루 넣고, 달걀 넣고..." 반복하는 대신<br>
+          "케이크 만들기"라는 이름을 붙여두면 나중에 그냥 불러서 쓰면 돼요.<br>
+          <strong>함수가 바로 그 "이름 붙인 레시피"예요.</strong><br>
+          파이토치 코드는 <code>def forward(self, x):</code> 같은 함수들의 묶음이에요. 함수를 모르면 파이토치 코드 절반이 안 읽혀요.
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">반드시 이해해야 할 개념</div>
+        <div class="concept-grid">
+          <span class="concept-pill">def 함수이름():</span>
+          <span class="concept-pill">return 값</span>
+          <span class="concept-pill">매개변수(인자)</span>
+          <span class="concept-pill">기본값 매개변수</span>
+          <span class="concept-pill">함수 안 변수 범위</span>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">풀 문제</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://wikidocs.net/23906" target="_blank">201~210 함수 정의·호출 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7037" target="_blank">211~215 인자·반환값 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7039" target="_blank">221~225 함수 활용 <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">건너뛰는 문제</div>
+        <div class="skip-pills">
+          <span class="skip-pill">216~220</span><span class="skip-pill">226~240</span>
+        </div>
+        <div class="skip-reason">재귀함수, *args/**kwargs — 클래스를 먼저 이해한 뒤 필요할 때 봐도 충분해요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4주 -->
+  <div class="week-card phase-func" id="w4">
+    <div class="week-header" onclick="toggle('w4')">
+      <span class="week-num">4주차</span>
+      <div class="week-meta">
+        <div class="week-title">함수 심화 · 모듈</div>
+        <div class="week-subtitle">lambda, map, import — AI 데이터 변환 핵심 · 15문제</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box">
+        <div class="why-label">왜 배워야 하나요?</div>
+        <div class="why-text">
+          AI 코드를 열면 항상 첫 줄이 <code>import torch</code>예요.<br>
+          이게 바로 <strong>남이 만들어둔 도구 박스를 가져오는 것</strong>이에요.<br>
+          또 <code>lambda x: x * 2</code> 같은 짧은 함수도 데이터 전처리에서 엄청 자주 나와요. 이 두 가지를 모르면 코드 첫 줄부터 막혀요.
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">반드시 이해해야 할 개념</div>
+        <div class="concept-grid">
+          <span class="concept-pill">lambda x: x*2</span>
+          <span class="concept-pill">map(함수, 리스트)</span>
+          <span class="concept-pill">filter()</span>
+          <span class="concept-pill">import 모듈</span>
+          <span class="concept-pill">from x import y</span>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">풀 문제</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://wikidocs.net/7039" target="_blank">226~228 lambda <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7040" target="_blank">231~233 map · filter <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7041" target="_blank">241~245 모듈 · import <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">건너뛰는 문제</div>
+        <div class="skip-pills">
+          <span class="skip-pill">229~230</span><span class="skip-pill">234~240</span><span class="skip-pill">246~250</span>
+        </div>
+        <div class="skip-reason">datetime, 문자열 포맷 모듈 — AI 코드보다 일반 개발에 가까운 내용이에요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5~6주 -->
+  <div class="week-card phase-class" id="w5">
+    <div class="week-header" onclick="toggle('w5')">
+      <span class="week-num">5~6주차</span>
+      <div class="week-meta">
+        <div class="week-title">클래스 · 객체지향</div>
+        <div class="week-subtitle">파이토치 모델 구조 그 자체 · 30문제</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box">
+        <div class="why-label">왜 배워야 하나요?</div>
+        <div class="why-text">
+          레고 설계도를 생각해봐요. 설계도 자체는 레고가 아니에요. 설계도대로 만들어야 비로소 레고가 돼요.<br>
+          <strong>클래스가 설계도고, 만들어진 결과물이 객체예요.</strong><br>
+          파이토치로 AI 모델을 만들 때 <code>class MyModel(nn.Module):</code> 이라고 쓰는데, 이게 "내 AI 모델 설계도"를 선언하는 거예요. 클래스를 모르면 파이토치 코드는 처음부터 끝까지 암호문이에요.
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">반드시 이해해야 할 개념</div>
+        <div class="concept-grid">
+          <span class="concept-pill">class 이름:</span>
+          <span class="concept-pill">def __init__(self)</span>
+          <span class="concept-pill">self.변수</span>
+          <span class="concept-pill">상속 (괄호 안에 부모)</span>
+          <span class="concept-pill">super().__init__()</span>
+          <span class="concept-pill">메서드 호출</span>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">풀 문제</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://wikidocs.net/7035" target="_blank">251~260 클래스 기초 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/7036" target="_blank">261~270 메서드·속성 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/24069" target="_blank">271~275 상속 기초 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://wikidocs.net/24070" target="_blank">281~285 상속 심화 <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">건너뛰는 문제</div>
+        <div class="skip-pills">
+          <span class="skip-pill">276~280</span><span class="skip-pill">286~290</span><span class="skip-pill">291~300</span>
+        </div>
+        <div class="skip-reason">파일 입출력, 예외처리 세부 — 나중에 필요할 때 찾아보면 충분해요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7~8주 -->
+  <div class="week-card phase-pytorch" id="w7">
+    <div class="week-header" onclick="toggle('w7')">
+      <span class="week-num">7~8주차</span>
+      <div class="week-meta">
+        <div class="week-title">파이토치 코드 실전 읽기</div>
+        <div class="week-subtitle">300제 졸업 · 실제 AI 코드 해독 시작</div>
+      </div>
+      <div class="week-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="week-body">
+      <div class="divider-line"></div>
+      <div class="why-box" style="border-left-color:#ffd080;">
+        <div class="why-label" style="color:#ffd080;">드디어 여기까지 왔어요</div>
+        <div class="why-text">
+          지금까지 배운 변수, 리스트, 함수, 클래스. 이 네 가지가 파이토치 코드의 전부예요.<br>
+          <strong>이제 실제 코드를 열고 "아, 이게 클래스구나. 이게 forward 함수구나" 하고 읽는 연습만 하면 돼요.</strong>
+        </div>
+      </div>
+      <div class="concept-section">
+        <div class="section-label">이제 이 코드가 읽혀야 해요</div>
+        <div class="pytorch-box">
+          <div class="pytorch-label">실제 파이토치 모델 코드</div>
+          <div class="code-block"><span class="code-kw">import</span> torch
+<span class="code-kw">import</span> torch.nn <span class="code-kw">as</span> nn
+
+<span class="code-kw">class</span> <span class="code-cls">MyModel</span>(nn.Module):    <span class="code-cm"># 클래스 — 5주차</span>
+
+    <span class="code-kw">def</span> <span class="code-fn">__init__</span>(self):          <span class="code-cm"># 함수 — 3주차</span>
+        super().__init__()       <span class="code-cm"># 상속 — 5주차</span>
+        self.layer = nn.Linear(10, 1)
+
+    <span class="code-kw">def</span> <span class="code-fn">forward</span>(self, x):        <span class="code-cm"># 함수 — 3주차</span>
+        <span class="code-kw">return</span> self.layer(x)     <span class="code-cm"># return — 3주차</span>
+
+model = <span class="code-cls">MyModel</span>()              <span class="code-cm"># 객체 생성 — 5주차</span>
+
+<span class="code-kw">for</span> epoch <span class="code-kw">in</span> range(100):      <span class="code-cm"># 반복문 — 2주차</span>
+    output = model(x)</div>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">7주차 — 읽어볼 코드</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html" target="_blank">파이토치 공식 — 모델 만들기 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://pytorch.org/tutorials/beginner/basics/data_tutorial.html" target="_blank">파이토치 공식 — 데이터 다루기 <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <div class="prob-group">
+        <div class="prob-group-title">8주차 — 읽어볼 코드</div>
+        <div class="prob-links">
+          <a class="prob-link" href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html" target="_blank">파이토치 공식 — 학습 루프 <span class="prob-link-arrow">↗</span></a>
+          <a class="prob-link" href="https://github.com/pytorch/examples/blob/main/mnist/main.py" target="_blank">GitHub — MNIST 예제 전체 코드 <span class="prob-link-arrow">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    막히는 문제가 있으면 문제 번호 갖고 바로 물어봐요.<br>
+    건너뛴 문제도 나중에 궁금하면 언제든 돌아올 수 있어요.
+  </div>
+
+</div>
+<script>
+  const maxWeekOf = { w1:1, w2:2, w3:3, w4:4, w5:6, w7:8 };
+
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('open');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    let highest = 0;
+    document.querySelectorAll('.week-card.open').forEach(c => {
+      if (maxWeekOf[c.id] > highest) highest = maxWeekOf[c.id];
+    });
+    document.querySelectorAll('.progress-seg').forEach((s, i) => {
+      s.classList.remove('done','active');
+      if (i+1 < highest) s.classList.add('done');
+      else if (i+1 === highest) s.classList.add('active');
+    });
+  }
+
+  document.getElementById('w1').classList.add('open');
+  updateProgress();
+</script>
+</body>
+</html>
