@@ -1,17 +1,18 @@
-import torch
-import torch.nn as nn
+import torch                                                           # PyTorch 라이브러리(딥러닝 계산에 필요한 핵심 도구들)
+import torch.nn as nn                                                  # 신경망(Neural Network)을 만드는 도구들 nn으로 명명
 
-class AlexNet(nn.Module):
-    def __init__(self, num_classes=1000):
-        super(AlexNet, self).__init__()
+class AlexNet(nn.Module):                                              # AlexNet이라는 클래스 생성, nn.Module을 상속받아서 PyTorch 모델의 기본 기능을 모두 물려받음
+    def __init__(self, num_classes=1000):                              # 초기화 함수, num_classes = 분류할 카테고리 수
+        super(AlexNet, self).__init__()                                # 부모 클래스인 nn.Module의 초기화도 함께 실행. 이걸 안 하면 모델이 제대로 작동하지 않음
         
         # ===== 합성곱 레이어 5개 =====
-        self.features = nn.Sequential(
+        self.features = nn.Sequential(                                 # 여러 레이어를 순서대로 묶어주는 컨테이너를 만듬
+            
             # Conv1: 224x224x3 → 55x55x96
-            nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=0),
-            nn.ReLU(inplace=True),
-            nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2),  # LRN
-            nn.MaxPool2d(kernel_size=3, stride=2),  # → 27x27x96
+            nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=0),     # 이미지 RGB 컬러 채널을 받아와서 96개 특징맵을 만드는 합성곱 연산 / 필터 사이즈 11x11, 4칸씩 이동 / 224×224 → 55×55
+            nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
+            nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2),  # LRN  # 주변 채널들과 비교해서 값을 정규화. 강한 반응은 더 강하게, 약한 반응은 억제하는 역할 (현재는 잘 사용 X)
+            nn.MaxPool2d(kernel_size=3, stride=2),                     # 3x3 영역 중 가장 큰 값만 뽑아서 크기 줄이기 / 55x55x96→ 27x27x96
 
             # Conv2: 27x27x96 → 27x27x256
             nn.Conv2d(96, 256, kernel_size=5, padding=2),
