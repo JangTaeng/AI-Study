@@ -13,7 +13,6 @@
 4. [전체 모델 PyTorch 구현](#4-전체-모델-pytorch-구현)
 5. [데이터 흐름 추적 (Shape 변화)](#5-데이터-흐름-추적-shape-변화)
 6. [논문 ↔ 코드 연결](#6-논문--코드-연결-pytorch)
-7. [면접 예상 질문](#7-면접-예상-질문-5개)
 
 ---
 
@@ -260,67 +259,9 @@ print(output.shape)  # → torch.Size([1, 1000])
 | "Overlapping max-pooling, z=3, s=2" | `nn.MaxPool2d(kernel_size=3, stride=2)` |
 | "Dropout with probability 0.5" | `nn.Dropout(p=0.5)` |
 | "three fully-connected layers, 4096 neurons" | `nn.Linear(9216, 4096)`, `nn.Linear(4096, 4096)` |
-| "1000-way softmax" | `nn.Linear(4096, 1000)` + `nn.Softmax(dim=1)` |
+| "1000-way softmax" | `nn.Linear(4096, 1000)` + `nn.Softmax(dim=1)` |  
 
 ---
-
-## 7. 면접 예상 질문 (5개)
-
-### Q1. AlexNet이 이전 모델들보다 혁신적이었던 이유 3가지를 설명하세요.
-
-<details>
-<summary>💡 힌트 보기</summary>
-
-새로운 활성화 함수, 과적합 방지 기법, 그리고 당시에는 새로웠던 학습 인프라 측면을 떠올려보세요.
-
-</details>
-
----
-
-### Q2. ReLU를 사용했을 때 tanh 대비 학습이 왜 빨라지나요?
-
-<details>
-<summary>💡 힌트 보기</summary>
-
-tanh의 기울기가 특정 값에서 어떻게 되는지, 그리고 그것이 역전파(backpropagation)에 어떤 영향을 주는지 생각해보세요.
-
-</details>
-
----
-
-### Q3. Dropout은 어떻게 과적합을 방지하고, 테스트 시에는 어떻게 동작하나요?
-
-<details>
-<summary>💡 힌트 보기</summary>
-
-학습 시와 추론(inference) 시의 동작 방식이 다릅니다. 논문에서 테스트 시 출력에 어떤 값을 곱한다고 했는지 찾아보세요.
-
-</details>
-
----
-
-### Q4. AlexNet에서 GPU를 2개 사용한 이유와, GPU 간에 언제 통신이 일어나는지 설명하세요.
-
-<details>
-<summary>💡 힌트 보기</summary>
-
-메모리 한계와 레이어 구조를 연결해서 생각해보세요. Conv3은 어디서 데이터를 받아오는지가 핵심입니다.
-
-</details>
-
----
-
-### Q5. Max Pooling과 Overlapping Pooling의 차이는 무엇이고, AlexNet은 왜 Overlapping Pooling을 선택했나요?
-
-<details>
-<summary>💡 힌트 보기</summary>
-
-일반 풀링에서는 stride(s)와 kernel size(z)의 관계가 어떻게 되는지, AlexNet에서는 이 값들을 어떻게 설정했는지 비교해보세요.
-
-</details>
-
----
-
 ## 📚 참고 자료
 
 - [원본 논문 (NeurIPS 2012)](https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html)
