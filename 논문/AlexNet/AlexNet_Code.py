@@ -40,7 +40,7 @@ class AlexNet(nn.Module):                                              # AlexNet
         )
         
         # ===== 완전연결 레이어 3개 =====
-        self.classifier = nn.Sequential(                               # 레이어들을 순서대로 묶
+        self.classifier = nn.Sequential(                               # 레이어들을 순서대로 묶기
 
             # FC1
             nn.Dropout(p=0.5),                  # FC1에 Dropout 적용 -> 50% 만큼 무작위로 꺼버림 / 의존을 낮춰 과적합 방지
