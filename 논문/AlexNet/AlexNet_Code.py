@@ -15,10 +15,10 @@ class AlexNet(nn.Module):                                              # AlexNet
             nn.MaxPool2d(kernel_size=3, stride=2),                     # 3x3 영역 중 가장 큰 값만 뽑아서 크기 줄이기 / 55x55x96→ 27x27x96
 
             # Conv2: 27x27x96 → 27x27x256
-            nn.Conv2d(96, 256, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
+            nn.Conv2d(96, 256, kernel_size=5, padding=2),              # 96 채널을 받아서 256으로 확장하는 합성곱 / 필터 사이즈는 5x5 패딩은 2 / 결과는 27x27
+            nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
             nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2),  # LRN
-            nn.MaxPool2d(kernel_size=3, stride=2),  # → 13x13x256
+            nn.MaxPool2d(kernel_size=3, stride=2),                     # 3x3 영역 중 가장 큰 값만 뽑아서 크기 줄이기 / 27x27x96 → 13x13x256
 
             # Conv3: 13x13x256 → 13x13x384 (풀링 없음)
             nn.Conv2d(256, 384, kernel_size=3, padding=1),
