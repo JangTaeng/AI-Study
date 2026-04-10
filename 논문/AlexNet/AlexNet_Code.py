@@ -17,40 +17,50 @@ class AlexNet(nn.Module):                                              # AlexNet
             # Conv2: 27x27x96 → 27x27x256
             nn.Conv2d(96, 256, kernel_size=5, padding=2),              # 96 채널을 받아서 256으로 확장하는 합성곱 / 필터 사이즈는 5x5 패딩은 2 / 결과는 27x27
             nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
-            nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2),  # LRN
+            nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2),  # LRN  # 주변 채널들과 비교해서 값을 정규화. 강한 반응은 더 강하게, 약한 반응은 억제하는 역할 (현재는 잘 사용 X)
             nn.MaxPool2d(kernel_size=3, stride=2),                     # 3x3 영역 중 가장 큰 값만 뽑아서 크기 줄이기 / 27x27x96 → 13x13x256
 
-            # Conv3: 13x13x256 → 13x13x384 (풀링 없음)
-            nn.Conv2d(256, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
+            # 풀링을 안하는 이유 : 정보 손실이 커져 의미있는 특징을 추출하기가 너무 어려워져
+            # 풀링 없이 Conv가 더 있는 이유 : 같은 크기에서 더 복잡한 패턴을 학습(연속으로 쌓으면 더 풍부한 특징을 뽑을 수 있음)
+            
+            # Conv3: 13x13x256 → 13x13x384 (풀링 없음)                  # "압축"이 아니라 "이해" 담당 레이어 그래서 풀링 X
+            nn.Conv2d(256, 384, kernel_size=3, padding=1),             # 256 채널을 받아서 384로 확장하는 합성곱 / 필터 사이즈는 3x3 / 패딩은 1 / 결과는 13x13 유지
+            nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
 
-            # Conv4: 13x13x384 → 13x13x384 (풀링 없음)
-            nn.Conv2d(384, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
+            # Conv4: 13x13x384 → 13x13x384 (풀링 없음)                  # "압축"이 아니라 "이해" 담당 레이어 그래서 풀링 X
+            nn.Conv2d(384, 384, kernel_size=3, padding=1),             # 384로 그대로 유지하면서 특징을 더 깊게 추출
+            nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
 
+
+            
             # Conv5: 13x13x384 → 13x13x256 → 풀링 후 6x6x256
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),  # → 6x6x256
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),             # 384 채널에서 256 채널로 줄임 / 필터 사이즈는 3x3 / 패딩은 1 / 결과는 13x13 유지
+            nn.ReLU(inplace=True),                                     # ReLU 함수 사용 ( 음수는 0, 양수는 그대로 적용)
+            nn.MaxPool2d(kernel_size=3, stride=2),                     # 3x3 영역 중 가장 큰 값만 뽑아서 크기 줄이기 / 13x13x256 → 6x6x256            
         )
         
         # ===== 완전연결 레이어 3개 =====
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=0.5),                  # FC1에 Dropout 적용
-            nn.Linear(6 * 6 * 256, 4096),       # 9216 → 4096
-            nn.ReLU(inplace=True),
+        self.classifier = nn.Sequential(                               # 레이어들을 순서대로 묶
 
+            # FC1
+            nn.Dropout(p=0.5),                  # FC1에 Dropout 적용 -> 50% 만큼 무작위로 꺼버림 / 의존을 낮춰 과적합 방지
+            nn.Linear(6 * 6 * 256, 4096),       # 9216(6*6*256) → 4096로 압축 -> 추상적 특징
+            nn.ReLU(inplace=True),              # ReLU 함수
+
+            # FC2
             nn.Dropout(p=0.5),                  # FC2에 Dropout 적용
-            nn.Linear(4096, 4096),              # 4096 → 4096
-            nn.ReLU(inplace=True),
+            nn.Linear(4096, 4096),              # 4096 → 4096 그대로 유지 (학습용) -> 추상적 특징
+            nn.ReLU(inplace=True),              # ReLU 함수
 
-            nn.Linear(4096, num_classes),       # 4096 → 1000
+            
+            # FC3
+            nn.Linear(4096, num_classes),       # 4096 → 1000 / ImageNet 데이터셋이 딱 1000가지 카테고리로 구성되서 1000이 된다.
         )
     
-    def forward(self, x):
-        x = self.features(x)           # 합성곱 처리
-        x = x.view(x.size(0), -1)     # Flatten: (batch, 256, 6, 6) → (batch, 9216)
-        x = self.classifier(x)        # FC 레이어 처리
+    def forward(self, x):                       # 순전파 (앞으로 흘러가는 경로를 정의하는 함수)
+        x = self.features(x)                    # 합성곱 레이어 처리
+        x = x.view(x.size(0), -1)               # Flatten: (batch, 256, 6, 6) → (batch, 9216) / 3D 텐서 (배치, 256, 6, 6)를 1D로 펼친다 / nn.Linear는 1D 벡터만 입력으로 받을 수 있다 
+        x = self.classifier(x)                  # FC 레이어 처리
         return x
 
 # 모델 생성 및 테스트
