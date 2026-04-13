@@ -1,0 +1,90 @@
+import torch
+import torch.nn as nn
+
+# ① 병목 블록 (Bottleneck Block) - ResNet-50/101/152용
+class BottleneckBlock(nn.Module):
+    expansion = 4  # 출력 채널 = 입력 채널 × 4
+
+    def __init__(self, in_channels, mid_channels, stride=1):
+        super().__init__()
+
+        # 논문의 F(x) 부분 (잔차 학습)
+        self.conv1 = nn.Conv2d(in_channels, mid_channels, kernel_size=1, bias=False)
+        self.bn1   = nn.BatchNorm2d(mid_channels)
+
+        self.conv2 = nn.Conv2d(mid_channels, mid_channels, kernel_size=3,
+                               stride=stride, padding=1, bias=False)
+        self.bn2   = nn.BatchNorm2d(mid_channels)
+
+        self.conv3 = nn.Conv2d(mid_channels, mid_channels * self.expansion,
+                               kernel_size=1, bias=False)
+        self.bn3   = nn.BatchNorm2d(mid_channels * self.expansion)
+
+        self.relu  = nn.ReLU(inplace=True)
+
+        # 숏컷 연결 - 채널 수나 크기가 다를 때 1×1 conv로 맞춤
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_channels != mid_channels * self.expansion:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, mid_channels * self.expansion,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(mid_channels * self.expansion)
+            )
+
+    def forward(self, x):
+        identity = x  # 원래 입력값 저장 (숏컷용)
+
+        out = self.relu(self.bn1(self.conv1(x)))   # 1×1 conv
+        out = self.relu(self.bn2(self.conv2(out))) # 3×3 conv
+        out = self.bn3(self.conv3(out))            # 1×1 conv (ReLU 전)
+
+        # 핵심! F(x) + x
+        out += self.shortcut(identity)
+        out = self.relu(out)
+        return out
+
+
+# ② 전체 ResNet-50 모델
+class ResNet50(nn.Module):
+    def __init__(self, num_classes=1000):
+        super().__init__()
+
+        # conv1
+        self.conv1   = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.bn1     = nn.BatchNorm2d(64)
+        self.relu    = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        # conv2_x ~ conv5_x
+        self.layer1 = self._make_layer(64,   64,  blocks=3, stride=1)
+        self.layer2 = self._make_layer(256,  128, blocks=4, stride=2)
+        self.layer3 = self._make_layer(512,  256, blocks=6, stride=2)
+        self.layer4 = self._make_layer(1024, 512, blocks=3, stride=2)
+
+        # 분류기
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc      = nn.Linear(2048, num_classes)
+
+    def _make_layer(self, in_channels, mid_channels, blocks, stride):
+        layers = [BottleneckBlock(in_channels, mid_channels, stride=stride)]
+        for _ in range(1, blocks):
+            layers.append(BottleneckBlock(mid_channels * 4, mid_channels))
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.maxpool(self.relu(self.bn1(self.conv1(x))))  # conv1
+        x = self.layer1(x)  # conv2_x
+        x = self.layer2(x)  # conv3_x
+        x = self.layer3(x)  # conv4_x
+        x = self.layer4(x)  # conv5_x
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x
+
+
+# 사용 예시
+model = ResNet50(num_classes=1000)
+dummy = torch.randn(1, 3, 224, 224)  # 이미지 1장
+output = model(dummy)
+print(output.shape)  # → torch.Size([1, 1000])
