@@ -55,7 +55,7 @@ class ResNet50(nn.Module):
         self.conv1   = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)    RGB, 64채널 , 7x7 필터, 이미지크기 절반 -> 대략적인 특징을 크게 훑어봄
         self.bn1     = nn.BatchNorm2d(64)
         self.relu    = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)         # 3×3 영역에서 최대값만 뽑음
 
         # conv2_x ~ conv5_x
         self.layer1 = self._make_layer(64,   64,  blocks=3, stride=1)
@@ -64,16 +64,16 @@ class ResNet50(nn.Module):
         self.layer4 = self._make_layer(1024, 512, blocks=3, stride=2)
 
         # 분류기
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc      = nn.Linear(2048, num_classes)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))                        # 각 채널의 전체 평균을 내서 1×1로 압축
+        self.fc      = nn.Linear(2048, num_classes)                        # 2048 → 1000 클래스
 
-    def _make_layer(self, in_channels, mid_channels, blocks, stride):
-        layers = [BottleneckBlock(in_channels, mid_channels, stride=stride)]
-        for _ in range(1, blocks):
-            layers.append(BottleneckBlock(mid_channels * 4, mid_channels))
-        return nn.Sequential(*layers)
+    def _make_layer(self, in_channels, mid_channels, blocks, stride): # 첫 블록만 먼저 만들어서 리스트에 넣음
+        layers = [BottleneckBlock(in_channels, mid_channels, stride=stride)]    # 얘만 stride 적용 (크기 줄이기 역할)
+        for _ in range(1, blocks):            # 나머지 블록들을 반복문으로 추가
+            layers.append(BottleneckBlock(mid_channels * 4, mid_channels))  # 두 번째 블록부터는 입력 채널이 이미 4배 늘어난 상태 (mid_channels * 4), stride=1
+        return nn.Sequential(*layers)         # 리스트를 순차 실행 컨테이너로 묶음/ *는 언패킹(리스트 풀어서 개별 인자로 넘기기)
 
-    def forward(self, x):
+    def forward(self, x):                     # 1번 차원부터 싹 펼치기
         x = self.maxpool(self.relu(self.bn1(self.conv1(x))))  # conv1
         x = self.layer1(x)  # conv2_x
         x = self.layer2(x)  # conv3_x
@@ -87,6 +87,6 @@ class ResNet50(nn.Module):
 
 # 사용 예시
 model = ResNet50(num_classes=1000)
-dummy = torch.randn(1, 3, 224, 224)  # 이미지 1장
-output = model(dummy)
+dummy = torch.randn(1, 3, 224, 224)  # 이미지 1장 (모델이 잘 돌아가는지 테스트용), (배치 1, 컬러, 224x224픽셀)
+output = model(dummy)                # 내부적으로 forward()가 자동 호출
 print(output.shape)  # → torch.Size([1, 1000])
