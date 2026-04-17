@@ -40,9 +40,9 @@ class BottleneckBlock(nn.Module):                  # nn.Module을 상속받아�
         out = self.relu(self.bn2(self.conv2(out))) # 3×3 conv
         out = self.bn3(self.conv3(out))            # 1×1 conv (ReLU 전)
 
-        # 핵심! F(x) + x
-        out += self.shortcut(identity)
-        out = self.relu(out)
+        # 핵심! F(x) + x  -> 이게 없으면 그냥CNN
+        out += self.shortcut(identity)            # 원본 x를 크기 맞춤
+        out = self.relu(out)                      # 거기에 더함 (F(x) + x)
         return out
 
 
