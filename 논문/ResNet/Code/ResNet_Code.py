@@ -1,5 +1,5 @@
-import torch
-import torch.nn as nn
+import torch                                                                            # 파이토치 딥러닝 프레임워크를 불러옴
+import torch.nn as nn                                                                   # neural network 모듈을 nn으로 명명
 
 # ① 병목 블록 (Bottleneck Block) - ResNet-50/101/152용
 class BottleneckBlock(nn.Module):
