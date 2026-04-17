@@ -1,12 +1,14 @@
-import torch                                                                            # 파이토치 딥러닝 프레임워크를 불러옴
-import torch.nn as nn                                                                   # neural network 모듈을 nn으로 명명
+import torch                                       # 파이토치 딥러닝 프레임워크를 불러옴
+import torch.nn as nn                              # neural network 모듈을 nn으로 명명
 
-# ① 병목 블록 (Bottleneck Block) - ResNet-50/101/152용
-class BottleneckBlock(nn.Module):
+
+# ① 병목 블록 (Bottleneck Block) - ResNet-50/101/152용        # 좁게 줄여서 계산량을 줄이고 더 깊게 학습함
+
+class BottleneckBlock(nn.Module):                  # nn.Module을 상속받아야 신경망인 것을 알 수 있다.
     expansion = 4  # 출력 채널 = 입력 채널 × 4
 
-    def __init__(self, in_channels, mid_channels, stride=1):
-        super().__init__()
+    def __init__(self, in_channels, mid_channels, stride=1):        # 초기화 함수(들어오는 블럭 채널 수, 병목으로 줄어든 중간 채널 수, 스트라이드 = 1 -> 이미지 크기를 얼마나 줄일지 (1=그대로, 2=절반). 기본값 1.
+        super().__init__()                         # 부모 클래스를 먼저 실행
 
         # 논문의 F(x) 부분 (잔차 학습)
         self.conv1 = nn.Conv2d(in_channels, mid_channels, kernel_size=1, bias=False)
