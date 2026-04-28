@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>건강차림 — 대화</title>
+<meta name="theme-color" content="#2D9D78" />
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'><rect width='56' height='56' rx='13' fill='%232D9D78'/><path d='M14 32 Q 14 44 28 45 Q 42 44 42 32 Z' fill='%23FAFAF7'/><ellipse cx='28' cy='32' rx='14' ry='2.5' fill='%231F6E55'/><line x1='28' y1='30' x2='28' y2='14' stroke='%232D9D78' stroke-width='1.5' stroke-linecap='round'/><path d='M28 22 Q 24 20 22 22' stroke='%232D9D78' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M28 18 Q 32 16 34 18' stroke='%232D9D78' stroke-width='1.5' stroke-linecap='round' fill='none'/><circle cx='28' cy='13' r='2' fill='%23FF8A65'/></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --sage: #2D9D78;
+    --sage-dark: #1F6E55;
+    --sage-50: #EBF1ED;
+    --sage-100: #D6E5DC;
+    --coral: #FF8A65;
+    --coral-soft: #FFE4D9;
+    --cream: #FAFAF7;
+    --paper: #FFFFFF;
+    --ink: #1A2E2A;
+    --ink-soft: #4A5C58;
+    --ink-mute: #6B7B78;
+    --line: #E5E9E6;
+    --line-soft: #EFF2F0;
+    --amber: #F4A300;
+    --amber-soft: #FFF4E0;
+
+    --serif: "Noto Serif KR", "Apple SD Gothic Neo", serif;
+    --sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --side-w: 260px;
+    --proc-w: 320px;
+    --top-h: 56px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--cream);
+    font-size: 14px; line-height: 1.6;
+    letter-spacing: -0.005em;
+    word-break: keep-all;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+  input, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+
+  /* ================ APP SHELL ================ */
+  .app {
+    display: grid;
+    grid-template-columns: var(--side-w) 1fr var(--proc-w);
+    grid-template-rows: var(--top-h) 1fr;
+    grid-template-areas: "topbar topbar topbar" "side main proc";
+    height: 100dvh;
+  }
+
+  /* ================ TOP BAR ================ */
+  .topbar {
+    grid-area: topbar;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 28px; height: 28px; }
+  .brand-name {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 17px; letter-spacing: -0.02em;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    color: var(--ink-soft);
+    transition: background .15s, color .15s;
+  }
+  .icon-btn:hover { background: var(--cream); color: var(--ink); }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--coral); color: white;
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 600;
+  }
+
+  /* ================ SIDEBAR ================ */
+  .side {
+    grid-area: side;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .side-head { padding: 16px; border-bottom: 1px solid var(--line-soft); }
+  .new-chat-btn {
+    width: 100%; height: 40px;
+    background: var(--sage); color: white;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; font-weight: 500;
+    transition: background .2s, transform .1s;
+  }
+  .new-chat-btn:hover { background: var(--sage-dark); }
+  .new-chat-btn:active { transform: scale(0.98); }
+
+  .conv-list { flex: 1; overflow-y: auto; padding: 12px 8px; }
+  .conv-section-label {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.08em; color: var(--ink-mute);
+    text-transform: uppercase;
+    padding: 8px 10px 4px;
+  }
+  .conv-item {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: block;
+    transition: background .15s;
+    position: relative;
+    margin-bottom: 2px;
+  }
+  .conv-item:hover { background: var(--cream); }
+  .conv-item.active {
+    background: var(--sage-50);
+  }
+  .conv-item.active::before {
+    content: ""; position: absolute; left: 0; top: 8px; bottom: 8px;
+    width: 3px; border-radius: 2px; background: var(--sage);
+  }
+  .conv-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .conv-item.active .conv-title { color: var(--sage-dark); }
+  .conv-meta {
+    font-size: 11px; color: var(--ink-mute); margin-top: 2px;
+  }
+
+  .side-foot {
+    padding: 12px;
+    border-top: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .side-foot .avatar { width: 28px; height: 28px; font-size: 11px; }
+  .side-foot .name { font-size: 12px; font-weight: 500; }
+  .side-foot .health { font-size: 11px; color: var(--ink-mute); display: flex; align-items: center; gap: 4px; }
+  .side-foot .health::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+  }
+
+  /* ================ CHAT MAIN ================ */
+  .main {
+    grid-area: main;
+    display: flex; flex-direction: column;
+    background: var(--cream);
+    min-height: 0;
+  }
+  .disclaimer {
+    background: var(--amber-soft);
+    border-bottom: 1px solid #F4D9A0;
+    padding: 8px 24px;
+    font-size: 12px;
+    color: #8A5B00;
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .disclaimer svg { flex-shrink: 0; }
+
+  .chat-scroll {
+    flex: 1; overflow-y: auto;
+    padding: 32px 0 24px;
+    scroll-behavior: smooth;
+  }
+  .chat-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex; flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Empty state */
+  .empty {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+    padding: 60px 24px 40px;
+  }
+  .empty-mark { width: 72px; height: 72px; margin-bottom: 24px; }
+  .empty h2 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 28px; margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  .empty p {
+    font-size: 14px; color: var(--ink-soft);
+    margin: 0 0 32px;
+    max-width: 420px;
+  }
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 540px;
+  }
+  .quick-btn {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    transition: border-color .2s, transform .1s, box-shadow .2s;
+  }
+  .quick-btn:hover {
+    border-color: var(--sage);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -8px rgba(45,157,120, 0.25);
+  }
+  .quick-btn .qicon {
+    font-size: 18px; margin-bottom: 6px;
+  }
+  .quick-btn .qtitle {
+    font-size: 13px; font-weight: 500;
+    line-height: 1.45;
+  }
+
+  /* Message bubbles */
+  .msg { display: flex; flex-direction: column; max-width: 100%; animation: msgIn .35s ease both; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .msg.user { align-items: flex-end; }
+  .msg.bot  { align-items: flex-start; }
+  .bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px; line-height: 1.6;
+    max-width: 84%;
+    white-space: pre-wrap;
+  }
+  .msg.user .bubble {
+    background: var(--coral); color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot .bubble {
+    background: var(--paper); color: var(--ink);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+
+  /* Inline cards inside bot messages */
+  .msg-inline {
+    width: 100%; max-width: 84%;
+    margin-top: 8px;
+  }
+  .score-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--sage);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .score-card.warn { border-left-color: var(--amber); }
+  .score-card.danger { border-left-color: #D34D3F; }
+  .score-num {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 32px; color: var(--sage-dark);
+    line-height: 1; letter-spacing: -0.02em;
+  }
+  .score-card.warn .score-num { color: #B07300; }
+  .score-card.danger .score-num { color: #B33D32; }
+  .score-meta { font-size: 11px; color: var(--ink-mute); }
+  .score-label { font-size: 12px; font-weight: 500; }
+  .score-detail { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .score-bar {
+    height: 6px; background: var(--line); border-radius: 3px;
+    overflow: hidden; margin-top: 8px;
+  }
+  .score-bar > span {
+    display: block; height: 100%;
+    background: var(--sage);
+    border-radius: 3px;
+    transition: width .8s ease;
+  }
+  .score-card.warn .score-bar > span { background: var(--amber); }
+  .score-card.danger .score-bar > span { background: #D34D3F; }
+
+  .source-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 10px;
+  }
+  .source-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--sage-50); color: var(--sage-dark);
+    padding: 5px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 500;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .source-chip:hover { background: var(--sage-100); }
+
+  .quick-replies {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 10px;
+  }
+  .quick-reply {
+    background: var(--paper);
+    border: 1px solid var(--sage);
+    color: var(--sage-dark);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    transition: background .15s;
+  }
+  .quick-reply:hover { background: var(--sage-50); }
+
+  /* Typing indicator */
+  .typing {
+    display: inline-flex; gap: 4px; padding: 14px 16px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 16px; border-bottom-left-radius: 4px;
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.18s; }
+  .typing span:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30%           { opacity: 1; transform: translateY(-3px); }
+  }
+
+  /* ================ INPUT BAR ================ */
+  .input-area {
+    flex-shrink: 0;
+    padding: 12px 24px 24px;
+    background: var(--cream);
+  }
+  .input-wrap {
+    max-width: 720px; margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 8px;
+    display: flex; align-items: flex-end; gap: 4px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .input-wrap:focus-within {
+    border-color: var(--sage);
+    box-shadow: 0 0 0 4px rgba(45,157,120, 0.08);
+  }
+  .input-area textarea {
+    flex: 1;
+    border: 0; outline: none; resize: none;
+    padding: 8px 10px;
+    font-size: 14px; line-height: 1.5;
+    background: transparent;
+    max-height: 160px; min-height: 22px;
+    color: var(--ink);
+  }
+  .input-area textarea::placeholder { color: var(--ink-mute); }
+  .send-btn {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--sage); color: white;
+    display: grid; place-items: center;
+    transition: background .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--sage-dark); }
+  .send-btn:active:not(:disabled) { transform: scale(0.95); }
+  .send-btn:disabled { background: var(--line); cursor: not-allowed; }
+  .input-hint {
+    max-width: 720px; margin: 8px auto 0;
+    font-size: 11px; color: var(--ink-mute);
+    text-align: center;
+  }
+
+  /* ================ PROCESS PANEL ================ */
+  .proc {
+    grid-area: proc;
+    background: var(--paper);
+    border-left: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .proc-head {
+    padding: 16px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .proc-title { font-size: 13px; font-weight: 600; }
+  .proc-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--cream); color: var(--ink-mute);
+    padding: 4px 10px; border-radius: 999px;
+    font-family: var(--mono); font-size: 10px;
+    transition: background .2s, color .2s;
+  }
+  .proc-status.live { background: var(--sage-50); color: var(--sage-dark); }
+  .proc-status .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-mute);
+  }
+  .proc-status.live .dot {
+    background: var(--sage);
+    animation: livePulse 1.6s infinite ease-in-out;
+  }
+  @keyframes livePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.4); opacity: 0.5; }
+  }
+
+  .proc-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .proc-section { margin-bottom: 22px; }
+  .proc-section:last-child { margin-bottom: 0; }
+  .proc-section-label {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.08em; color: var(--ink-mute);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .proc-section-count {
+    background: var(--cream); color: var(--ink-soft);
+    padding: 1px 6px; border-radius: 999px;
+    font-size: 9px;
+  }
+
+  .proc-empty {
+    color: var(--ink-mute);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .proc-row {
+    background: var(--cream);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+    animation: rowIn .4s ease both;
+  }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .proc-row.running {
+    background: var(--sage-50);
+    border-color: var(--sage-100);
+  }
+  .proc-icon {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .proc-icon.done { background: var(--sage); }
+  .proc-icon.done::after {
+    content: ""; width: 5px; height: 8px;
+    border-right: 1.5px solid white;
+    border-bottom: 1.5px solid white;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .proc-icon.running {
+    background: transparent;
+    border: 2px solid var(--sage);
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .proc-row .label {
+    font-family: var(--mono);
+    color: var(--ink);
+    flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .proc-row .duration {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+  }
+
+  .doc-row {
+    background: var(--cream);
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--sage);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background .15s;
+    animation: rowIn .4s ease both;
+  }
+  .doc-row:hover { background: var(--sage-50); }
+  .doc-title { font-size: 12px; font-weight: 500; color: var(--ink); }
+  .doc-meta { font-size: 10px; color: var(--ink-mute); margin-top: 2px; }
+  .doc-bar {
+    margin-top: 6px;
+    height: 3px; background: var(--line);
+    border-radius: 2px; overflow: hidden;
+  }
+  .doc-bar > span {
+    display: block; height: 100%; background: var(--sage);
+    border-radius: 2px;
+  }
+
+  /* ================ Responsive ================ */
+  @media (max-width: 1100px) {
+    :root { --side-w: 220px; --proc-w: 280px; }
+  }
+  @media (max-width: 900px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-areas: "topbar" "main";
+    }
+    .side, .proc { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 56 56" aria-hidden="true">
+        <rect width="56" height="56" rx="13" fill="#2D9D78"/>
+        <path d="M14 32 Q 14 44 28 45 Q 42 44 42 32 Z" fill="#FAFAF7"/>
+        <ellipse cx="28" cy="32" rx="14" ry="2.5" fill="#1F6E55"/>
+        <line x1="28" y1="30" x2="28" y2="14" stroke="#2D9D78" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M28 22 Q 24 20 22 22" stroke="#2D9D78" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M28 18 Q 32 16 34 18" stroke="#2D9D78" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <circle cx="28" cy="13" r="2" fill="#FF8A65"/>
+      </svg>
+      <span class="brand-name">건강차림</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" title="설정">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <div class="avatar">JT</div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="side-head">
+      <button class="new-chat-btn" id="newChatBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        새 대화
+      </button>
+    </div>
+
+    <div class="conv-list" id="convList">
+      <div class="conv-section-label">최근 대화</div>
+      <!-- conv items injected by JS -->
+    </div>
+
+    <div class="side-foot">
+      <div class="avatar">JT</div>
+      <div>
+        <div class="name">장태영</div>
+        <div class="health">건강 정보 등록됨</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CHAT MAIN -->
+  <main class="main">
+    <div class="disclaimer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      이 서비스는 의료 상담을 대체하지 않으며, 참고용 정보를 제공합니다.
+    </div>
+
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-inner" id="chatInner">
+        <!-- Empty state shown initially -->
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="inputBox" rows="1" placeholder="메시지를 입력하세요. 예: 점심에 김밥 먹어도 될까요?"></textarea>
+        <button class="send-btn" id="sendBtn" disabled aria-label="보내기">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-hint">건강차림은 LLM과 RAG 기반으로 동작하며 모든 응답에 출처가 포함됩니다</div>
+    </div>
+  </main>
+
+  <!-- PROCESS PANEL -->
+  <aside class="proc">
+    <div class="proc-head">
+      <div class="proc-title">처리 과정</div>
+      <div class="proc-status" id="procStatus">
+        <span class="dot"></span>
+        <span id="procStatusText">대기 중</span>
+      </div>
+    </div>
+
+    <div class="proc-body" id="procBody">
+      <div class="proc-section">
+        <div class="proc-section-label">
+          Function Call
+          <span class="proc-section-count" id="fcCount">0</span>
+        </div>
+        <div id="fcList">
+          <div class="proc-empty">메시지를 보내면 여기에 표시됩니다</div>
+        </div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-label">
+          참조 문서
+          <span class="proc-section-count" id="docCount">0</span>
+        </div>
+        <div id="docList">
+          <div class="proc-empty">참조한 의료 문서가 표시됩니다</div>
+        </div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-label">DB 조회</div>
+        <div id="dbList">
+          <div class="proc-empty">조회한 데이터베이스 내역</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/* ===========================================================
+   건강차림 챗봇 — Mock 응답 엔진
+   실제 백엔드 없이 키워드 기반으로 음식 점수, 출처, 처리 과정을
+   시뮬레이션합니다. 백엔드 연결 시 sendMessage 내부의 setTimeout
+   체인을 fetch/SSE 호출로 교체하면 됩니다.
+   =========================================================== */
+
+const STORE_KEY = 'gc_conversations_v1';
+let state = {
+  conversations: [],
+  activeId: null,
+};
+
+/* ---------- Storage ---------- */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (_) {}
+  if (!state.conversations.length) {
+    seedDemo();
+  }
+  if (!state.activeId) state.activeId = state.conversations[0].id;
+}
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(_){}
+}
+function seedDemo() {
+  state.conversations = [
+    { id: uid(), title: '새 대화', updatedAt: Date.now(), messages: [] },
+  ];
+}
+function uid() { return Math.random().toString(36).slice(2, 10); }
+function activeConv() { return state.conversations.find(c => c.id === state.activeId); }
+function relTime(ts) {
+  const d = (Date.now() - ts) / 1000;
+  if (d < 60) return '방금 전';
+  if (d < 3600) return `${Math.floor(d/60)}분 전`;
+  if (d < 86400) return `${Math.floor(d/3600)}시간 전`;
+  return `${Math.floor(d/86400)}일 전`;
+}
+
+/* ---------- Mock response engine ---------- */
+const FOOD_DB = [
+  {
+    keys: ['김밥', '김 밥', 'gimbap'],
+    name: '김밥 (참치김밥 기준)',
+    score: 72, level: 'warn',
+    detail: '탄수화물 다소 높음 · 단백질 적정',
+    reply: '참치김밥 한 줄은 탄수화물이 70g 이상으로 식후 혈당 부담이 큽니다.\n현미김밥 + 야채 추가, 또는 절반만 드시는 것을 추천드려요.',
+    sources: [
+      { title: '당뇨병 식이 가이드라인 2024', meta: '대한당뇨병학회 · p.42', score: 92 },
+      { title: 'ADA Standards of Care', meta: 'American Diabetes Association · p.18', score: 78 },
+    ],
+    quickReplies: ['대안 메뉴 추천', '현미김밥은 어때?', '간식으론?'],
+  },
+  {
+    keys: ['짜장면', '짜장', '자장면'],
+    name: '짜장면',
+    score: 48, level: 'danger',
+    detail: '나트륨·지방 과다 · 정제 탄수화물',
+    reply: '짜장면은 나트륨 1,800mg을 넘는 경우가 많고 정제 탄수화물 비중이 높아 당뇨에 부담이 큽니다.\n간짜장보다 일반 짜장이, 면 양을 절반으로 줄이는 것이 차선책이에요.',
+    sources: [
+      { title: '한국인 영양소 섭취 기준', meta: '보건복지부 2020 · p.89', score: 88 },
+      { title: '식약처 외식 영양정보 DB', meta: '나트륨 데이터 · 2024', score: 75 },
+    ],
+    quickReplies: ['덜 부담되는 중식 추천', '짬뽕은?'],
+  },
+  {
+    keys: ['떡볶이', '떡 볶이'],
+    name: '떡볶이',
+    score: 42, level: 'danger',
+    detail: '당분·나트륨 모두 높음',
+    reply: '떡볶이는 떡의 GI 지수가 매우 높고 양념의 당·나트륨이 많아 권장하지 않습니다.\n꼭 드시고 싶다면 단백질(어묵·계란) 비중을 늘리고 양을 1/3로 제한해 보세요.',
+    sources: [
+      { title: '한국 식품 GI 지수 데이터', meta: '한국영양학회 · p.27', score: 85 },
+    ],
+    quickReplies: ['덜 자극적인 분식', '대체 음식'],
+  },
+  {
+    keys: ['샐러드', '샐러 드', 'salad'],
+    name: '닭가슴살 샐러드',
+    score: 91, level: 'good',
+    detail: '단백질 풍부 · 식이섬유 충분',
+    reply: '훌륭한 선택이에요. 닭가슴살 샐러드는 혈당 영향이 거의 없고 포만감도 오래갑니다.\n드레싱은 발사믹·올리브오일 조합이 좋고, 시저·허니머스타드는 칼로리·당분이 높으니 주의하세요.',
+    sources: [
+      { title: '당뇨병 식이 가이드라인 2024', meta: '대한당뇨병학회 · p.51', score: 90 },
+    ],
+    quickReplies: ['적절한 양은?', '드레싱 추천'],
+  },
+  {
+    keys: ['라면', '라 면', 'ramen'],
+    name: '라면',
+    score: 38, level: 'danger',
+    detail: '나트륨 과다 (1일 권장량의 90%)',
+    reply: '라면 한 봉지의 나트륨은 1,800~2,000mg으로 고혈압 환자에겐 특히 위험합니다.\n국물을 절반만 드시고 계란·두부로 단백질을 보강해 보세요. 면 양도 70%만.',
+    sources: [
+      { title: '고혈압 진료 지침 2023', meta: '대한고혈압학회 · p.34', score: 94 },
+      { title: '식약처 가공식품 영양정보', meta: '라면류 평균 · 2024', score: 82 },
+    ],
+    quickReplies: ['건강한 면 요리', '국물 없이 먹는 법'],
+  },
+  {
+    keys: ['바나나', 'banana'],
+    name: '바나나 (중간 크기 1개)',
+    score: 78, level: 'warn',
+    detail: '천연 당분 다소 있음 · 칼륨 풍부',
+    reply: '바나나는 식이섬유와 칼륨이 풍부해 좋지만, 잘 익은 바나나는 GI가 60 이상으로 식후 혈당 영향이 있습니다.\n간식이라면 절반만, 단백질(견과류·요거트)과 함께 드시면 혈당 스파이크를 줄일 수 있어요.',
+    sources: [
+      { title: '한국 과일 영양 데이터베이스', meta: '농촌진흥청 · 2023', score: 86 },
+    ],
+    quickReplies: ['더 좋은 간식', '식후 vs 식간'],
+  },
+];
+
+const DEFAULT_REPLY = {
+  reply: '말씀해 주신 음식에 대해 더 자세히 알려드리려면 정보가 조금 더 필요해요.\n구체적인 메뉴 이름이나 재료를 알려주시면 건강 정보에 맞춰 점수와 대안을 제안해드릴게요.',
+  sources: [],
+  quickReplies: ['김밥은 어때?', '짜장면은?', '샐러드 추천'],
+};
+
+function findFood(text) {
+  const t = text.toLowerCase();
+  for (const f of FOOD_DB) {
+    if (f.keys.some(k => t.includes(k.toLowerCase()))) return f;
+  }
+  return null;
+}
+
+/* ---------- Rendering ---------- */
+const $ = (sel) => document.querySelector(sel);
+const chatInner = $('#chatInner');
+const chatScroll = $('#chatScroll');
+const inputBox = $('#inputBox');
+const sendBtn = $('#sendBtn');
+const procStatus = $('#procStatus');
+const procStatusText = $('#procStatusText');
+
+function renderConvList() {
+  const list = $('#convList');
+  const items = state.conversations
+    .slice()
+    .sort((a,b) => b.updatedAt - a.updatedAt);
+  list.innerHTML = '<div class="conv-section-label">최근 대화</div>' +
+    items.map(c => `
+      <button class="conv-item ${c.id === state.activeId ? 'active' : ''}" data-id="${c.id}">
+        <div class="conv-title">${escapeHtml(c.title || '새 대화')}</div>
+        <div class="conv-meta">${relTime(c.updatedAt)} · ${c.messages.length} 메시지</div>
+      </button>
+    `).join('');
+  list.querySelectorAll('.conv-item').forEach(el => {
+    el.addEventListener('click', () => {
+      state.activeId = el.dataset.id;
+      saveState();
+      renderConvList();
+      renderMessages();
+      clearProc();
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function renderMessages() {
+  const conv = activeConv();
+  chatInner.innerHTML = '';
+
+  if (!conv.messages.length) {
+    renderEmpty();
+    return;
+  }
+
+  for (const m of conv.messages) {
+    chatInner.appendChild(renderMessage(m));
+  }
+  scrollToBottom();
+}
+
+function renderEmpty() {
+  const html = `
+    <div class="empty">
+      <svg class="empty-mark" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M22 55 Q 22 78 50 80 Q 78 78 78 55 Z" fill="#2D9D78"/>
+        <ellipse cx="50" cy="55" rx="28" ry="4.5" fill="#1F6E55"/>
+        <ellipse cx="50" cy="55" rx="26" ry="3" fill="#2D9D78"/>
+        <ellipse cx="50" cy="56" rx="22" ry="2" fill="#1F6E55" opacity="0.6"/>
+        <line x1="50" y1="53" x2="50" y2="22" stroke="#2D9D78" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M50 38 Q 42 35 38 38 Q 42 41 47 41" stroke="#2D9D78" stroke-width="2.5" stroke-linecap="round" fill="#2D9D78"/>
+        <path d="M50 30 Q 58 27 62 30 Q 58 33 53 33" stroke="#2D9D78" stroke-width="2.5" stroke-linecap="round" fill="#2D9D78"/>
+        <circle cx="50" cy="20" r="3.5" fill="#FF8A65"/>
+      </svg>
+      <h2>오늘은 어떤 끼니를 차려드릴까요?</h2>
+      <p>음식 이름이나 식단 사진을 알려주시면, 건강 정보에 맞춰 점수와 대안을 차려드립니다.</p>
+      <div class="quick-grid">
+        <button class="quick-btn" data-q="당뇨인데 점심에 김밥 먹어도 될까요?">
+          <div class="qicon">🍙</div>
+          <div class="qtitle">당뇨인데 점심에<br>김밥 먹어도 될까요?</div>
+        </button>
+        <button class="quick-btn" data-q="고혈압인데 라면 한 그릇 어때?">
+          <div class="qicon">🍜</div>
+          <div class="qtitle">고혈압인데 라면<br>한 그릇 어때?</div>
+        </button>
+        <button class="quick-btn" data-q="간식으로 바나나 괜찮을까요?">
+          <div class="qicon">🍌</div>
+          <div class="qtitle">간식으로 바나나<br>괜찮을까요?</div>
+        </button>
+        <button class="quick-btn" data-q="다이어트 중인데 닭가슴살 샐러드는?">
+          <div class="qicon">🥗</div>
+          <div class="qtitle">다이어트 중인데<br>닭가슴살 샐러드는?</div>
+        </button>
+      </div>
+    </div>
+  `;
+  chatInner.innerHTML = html;
+  chatInner.querySelectorAll('.quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      sendMessage(btn.dataset.q);
+    });
+  });
+}
+
+function renderMessage(m) {
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${m.role}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = m.text;
+  wrap.appendChild(bubble);
+
+  if (m.role === 'bot' && m.food) {
+    const card = document.createElement('div');
+    card.className = 'msg-inline';
+    card.innerHTML = `
+      <div class="score-card ${m.food.level === 'good' ? '' : m.food.level}">
+        <div>
+          <div class="score-num">${m.food.score}</div>
+          <div class="score-meta">/ 100점</div>
+        </div>
+        <div>
+          <div class="score-label">${escapeHtml(m.food.name)}</div>
+          <div class="score-detail">${escapeHtml(m.food.detail)}</div>
+          <div class="score-bar"><span style="width: ${m.food.score}%"></span></div>
+        </div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  }
+
+  if (m.role === 'bot' && m.sources && m.sources.length) {
+    const chips = document.createElement('div');
+    chips.className = 'msg-inline source-chips';
+    chips.innerHTML = m.sources.map(s =>
+      `<button class="source-chip" title="${escapeHtml(s.meta)}">📄 ${escapeHtml(s.title.slice(0, 18))}${s.title.length > 18 ? '…' : ''}</button>`
+    ).join('');
+    wrap.appendChild(chips);
+  }
+
+  if (m.role === 'bot' && m.quickReplies && m.quickReplies.length) {
+    const qr = document.createElement('div');
+    qr.className = 'msg-inline quick-replies';
+    qr.innerHTML = m.quickReplies.map(t =>
+      `<button class="quick-reply">${escapeHtml(t)}</button>`
+    ).join('');
+    qr.querySelectorAll('.quick-reply').forEach(btn => {
+      btn.addEventListener('click', () => sendMessage(btn.textContent));
+    });
+    wrap.appendChild(qr);
+  }
+
+  return wrap;
+}
+
+function scrollToBottom() {
+  requestAnimationFrame(() => {
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+  });
+}
+
+/* ---------- Process panel ---------- */
+function clearProc() {
+  $('#fcList').innerHTML = '<div class="proc-empty">메시지를 보내면 여기에 표시됩니다</div>';
+  $('#docList').innerHTML = '<div class="proc-empty">참조한 의료 문서가 표시됩니다</div>';
+  $('#dbList').innerHTML = '<div class="proc-empty">조회한 데이터베이스 내역</div>';
+  $('#fcCount').textContent = '0';
+  $('#docCount').textContent = '0';
+  setProcStatus('idle', '대기 중');
+}
+function setProcStatus(kind, text) {
+  procStatus.classList.toggle('live', kind === 'live');
+  procStatusText.textContent = text;
+}
+function addProcRow(listSel, label, durationMs, running = false) {
+  const list = $(listSel);
+  if (list.querySelector('.proc-empty')) list.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'proc-row' + (running ? ' running' : '');
+  row.innerHTML = `
+    <div class="proc-icon ${running ? 'running' : 'done'}"></div>
+    <div class="label">${escapeHtml(label)}</div>
+    <div class="duration">${running ? '...' : durationMs + 'ms'}</div>
+  `;
+  list.appendChild(row);
+  return row;
+}
+function addDocRow(doc) {
+  const list = $('#docList');
+  if (list.querySelector('.proc-empty')) list.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'doc-row';
+  row.innerHTML = `
+    <div class="doc-title">${escapeHtml(doc.title)}</div>
+    <div class="doc-meta">${escapeHtml(doc.meta)} · 관련도 ${doc.score}%</div>
+    <div class="doc-bar"><span style="width:${doc.score}%"></span></div>
+  `;
+  list.appendChild(row);
+}
+
+/* ---------- Send flow ---------- */
+async function sendMessage(text) {
+  text = (text || '').trim();
+  if (!text) return;
+
+  const conv = activeConv();
+  // Save user message
+  conv.messages.push({ role: 'user', text, t: Date.now() });
+  if (conv.messages.length === 1) {
+    conv.title = text.slice(0, 30);
+  }
+  conv.updatedAt = Date.now();
+  saveState();
+  renderConvList();
+  renderMessages();
+
+  inputBox.value = '';
+  autoresize();
+  sendBtn.disabled = true;
+
+  // Show typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'msg bot';
+  typing.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  chatInner.appendChild(typing);
+  scrollToBottom();
+
+  // Reset & animate process panel
+  clearProc();
+  setProcStatus('live', '실행 중');
+
+  // 1) get_user_profile
+  await sleep(300);
+  let r = addProcRow('#fcList', 'get_user_profile()', 0, true);
+  $('#fcCount').textContent = '1';
+  await sleep(400);
+  r.querySelector('.proc-icon').className = 'proc-icon done';
+  r.classList.remove('running');
+  r.querySelector('.duration').textContent = '420ms';
+
+  // 2) DB query
+  addProcRow('#dbList', 'SELECT FROM user_health', 110);
+  await sleep(120);
+
+  // 3) RAG search
+  r = addProcRow('#fcList', 'search_documents()', 0, true);
+  $('#fcCount').textContent = '2';
+  await sleep(900);
+  r.querySelector('.proc-icon').className = 'proc-icon done';
+  r.classList.remove('running');
+  r.querySelector('.duration').textContent = '1140ms';
+
+  // Determine response
+  const food = findFood(text);
+  const sources = food ? food.sources : DEFAULT_REPLY.sources;
+
+  // 4) Add doc references
+  for (const s of sources) {
+    addDocRow(s);
+    await sleep(180);
+  }
+  $('#docCount').textContent = String(sources.length);
+
+  // 5) DB query for food log
+  addProcRow('#dbList', 'SELECT FROM food_log', 95);
+  await sleep(150);
+
+  // 6) Generation
+  setProcStatus('live', '응답 생성 중');
+  await sleep(700);
+
+  // Remove typing, add bot message
+  typing.remove();
+
+  const botMsg = {
+    role: 'bot',
+    text: food ? food.reply : DEFAULT_REPLY.reply,
+    food: food ? { name: food.name, score: food.score, level: food.level, detail: food.detail } : null,
+    sources: sources,
+    quickReplies: food ? food.quickReplies : DEFAULT_REPLY.quickReplies,
+    t: Date.now(),
+  };
+  conv.messages.push(botMsg);
+  conv.updatedAt = Date.now();
+  saveState();
+
+  chatInner.appendChild(renderMessage(botMsg));
+  scrollToBottom();
+  renderConvList();
+
+  setProcStatus('idle', '완료');
+  sendBtn.disabled = inputBox.value.trim().length === 0;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ---------- Input handling ---------- */
+function autoresize() {
+  inputBox.style.height = 'auto';
+  inputBox.style.height = Math.min(inputBox.scrollHeight, 160) + 'px';
+}
+
+inputBox.addEventListener('input', () => {
+  autoresize();
+  sendBtn.disabled = inputBox.value.trim().length === 0;
+});
+inputBox.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    e.preventDefault();
+    if (!sendBtn.disabled) sendMessage(inputBox.value);
+  }
+});
+sendBtn.addEventListener('click', () => sendMessage(inputBox.value));
+
+$('#newChatBtn').addEventListener('click', () => {
+  const c = { id: uid(), title: '새 대화', updatedAt: Date.now(), messages: [] };
+  state.conversations.unshift(c);
+  state.activeId = c.id;
+  saveState();
+  renderConvList();
+  renderMessages();
+  clearProc();
+  inputBox.focus();
+});
+
+/* ---------- Init ---------- */
+loadState();
+renderConvList();
+renderMessages();
+clearProc();
+inputBox.focus();
+</script>
+
+</body>
+</html>
