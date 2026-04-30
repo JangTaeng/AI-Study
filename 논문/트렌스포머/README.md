@@ -1,15 +1,3 @@
----
-title: Attention Is All You Need (Transformer)
-emoji: 🤖
-colorFrom: blue
-colorTo: purple
-sdk: gradio
-sdk_version: 4.0.0
-app_file: app.py
-pinned: false
-license: mit
----
-
 # 📘 Attention Is All You Need (Transformer) 완전 분석
 
 > Vaswani et al., NeurIPS 2017
@@ -552,37 +540,6 @@ class Transformer(nn.Module):
                         (64, 12, 37000)   ← 다음 단어 예측 확률
 ```
 
----
-
-## 7. 면접 예상 질문 (5개)
-
-### Q1. Self-Attention과 RNN의 차이를 설명해보세요. 트랜스포머는 왜 RNN보다 빠른가요?
-
-> 💡 **힌트**: "병렬화 가능 여부"와 "두 단어 사이의 경로 길이(path length)" 두 가지 관점에서 비교해보세요. 논문 Table 1의 Sequential Operations와 Maximum Path Length를 떠올리면 좋습니다.
-
----
-
-### Q2. Scaled Dot-Product Attention에서 왜 √d_k로 나누나요? 안 나누면 어떻게 되나요?
-
-> 💡 **힌트**: $d_k$가 커지면 내적값의 분산이 어떻게 되는지 생각해보세요. 그리고 그 결과가 softmax 함수와 만났을 때 gradient 흐름에 어떤 영향을 주는지 떠올려보면 됩니다.
-
----
-
-### Q3. Multi-Head Attention은 왜 한 개의 큰 어텐션을 쓰지 않고 여러 개로 쪼개나요?
-
-> 💡 **힌트**: "표현 부분공간(representation subspace)"이라는 단어와 "단일 헤드의 평균(averaging)이 가지는 한계"가 키워드입니다. 논문 Figure 3, 4, 5의 어텐션 시각화에서 헤드마다 다른 패턴을 보였다는 점도 연결지어 보세요.
-
----
-
-### Q4. 디코더의 Self-Attention에서는 왜 마스킹(Masking)을 사용하나요? 어떻게 구현되나요?
-
-> 💡 **힌트**: "auto-regressive(자기회귀) 속성"을 떠올려보세요. 학습 시점에 미래 단어를 보면 안 되는 이유와, softmax 입력 단계에서 어떤 값을 어떻게 처리하는지가 답의 핵심입니다.
-
----
-
-### Q5. Positional Encoding이 왜 필요한가요? 학습형(learned) 대신 sin/cos 함수를 쓴 이유는?
-
-> 💡 **힌트**: 트랜스포머가 RNN과 달리 어떤 정보를 자연스럽게 갖지 못하는지부터 생각해보세요. 그리고 sin/cos 함수가 학습형 임베딩에 비해 가지는 장점(특히 학습 시 보지 못한 길이의 시퀀스 처리)도 함께 답하면 좋습니다.
 
 ---
 
