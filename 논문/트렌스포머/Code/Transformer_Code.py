@@ -137,23 +137,37 @@ class DecoderLayer(nn.Module):
 
 
 # 7) 전체 Transformer
+# 소스/타겟 어휘 각각에 대한 임베딩 테이블
 class Transformer(nn.Module):
     def __init__(self, src_vocab, tgt_vocab, d_model=512, N=6, h=8, d_ff=2048):
         super().__init__()
         self.src_embed = nn.Embedding(src_vocab, d_model)
         self.tgt_embed = nn.Embedding(tgt_vocab, d_model)
+
+        # 위치 인코딩 1개, 인코더 6층, 디코더 6층, 그리고 최종 vocab 크기로 투영하는 출력층을 만듦
         self.pe = PositionalEncoding(d_model)
         self.encoder = nn.ModuleList([EncoderLayer(d_model, h, d_ff) for _ in range(N)])
         self.decoder = nn.ModuleList([DecoderLayer(d_model, h, d_ff) for _ in range(N)])
         self.out = nn.Linear(d_model, tgt_vocab)
 
+    # 소스 토큰을 임베딩한 뒤 √d_model을 곱함 (임베딩 스케일 보정 - 논문 관행)
+    # 그다음 위치 인코딩을 더함
     def forward(self, src, tgt, src_mask=None, tgt_mask=None):
         # 인코더
         e = self.pe(self.src_embed(src) * math.sqrt(512))
+
+        # 인코더 6층을 차례로 통과
         for layer in self.encoder:
             e = layer(e, src_mask)
+            
         # 디코더
+        # 타겟도 동일하게 임베딩+PE 후, 디코더 각 층에 인코더 출력 e와 두 마스크를 함께 넘겨
         d = self.pe(self.tgt_embed(tgt) * math.sqrt(512))
         for layer in self.decoder:
             d = layer(d, e, src_mask, tgt_mask)
+
+        # 마지막으로 vocab 크기로 투영해 각 토큰 위치별 로짓을 반환
+        # 이후 외부에서 softmax + cross-entropy로 학습
         return self.out(d)
+
+        # 전체 정리 : 입력 토큰 → 임베딩 + 위치인코딩 → (Self-Attention + FFN) × N → 인코더 출력 → 디코더에서 (Masked Self-Attn + Cross-Attn + FFN) × N → vocab 로짓
