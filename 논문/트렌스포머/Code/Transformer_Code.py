@@ -1,7 +1,7 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import math
+import torch                                           # PyTorch 라이브러리 본체를 불러옴
+import torch.nn as nn                                  # PyTorch의 신경망(Neural Network) 모듈을 nn이라는 짧은 이름으로 불러옴
+import torch.nn.functional as F                        # 학습 가능한 파라미터가 없는 연산을 쓸 때 주로 사용
+import math                                            # PyTorch 텐서가 아닌 일반 파이썬 스칼라 값을 계산할 때 사용
 
 # 1) Scaled Dot-Product Attention
 def scaled_dot_product_attention(Q, K, V, mask=None):
