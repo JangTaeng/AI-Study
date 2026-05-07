@@ -4,36 +4,43 @@ import torch.nn.functional as F                        # 학습 가능한 파라
 import math                                            # PyTorch 텐서가 아닌 일반 파이썬 스칼라 값을 계산할 때 사용
 
 # 1) Scaled Dot-Product Attention
-def scaled_dot_product_attention(Q, K, V, mask=None):
-    d_k = Q.size(-1)
+def scaled_dot_product_attention(Q, K, V, mask=None):  # Query, Key, Value 세 텐서와 선택적 마스크를 받는 함수를 정의
+    d_k = Q.size(-1)                                   # Q의 마지막 차원(키 벡터의 차원, 보통 64)을 가져옴
     scores = Q @ K.transpose(-2, -1) / math.sqrt(d_k)  # 논문 식 (1)
-    if mask is not None:
-        scores = scores.masked_fill(mask == 0, -1e9)   # 마스킹
-    attn = F.softmax(scores, dim=-1)
-    return attn @ V
+    if mask is not None:                                
+        scores = scores.masked_fill(mask == 0, -1e9)   # 마스크가 0인 위치(보면 안 되는 위치)에 매우 작은 값(-1e9)을 넣음
+    attn = F.softmax(scores, dim=-1)                   # softmax를 거치면 그 자리는 거의 0이 됨 / 마지막 차원(키 축)을 따라 softmax를 적용해 확률 분포 형태의 attention 가중치를 얻음
+    return attn @ V                                    # 가중치와 V를 곱해 가중합을 반환
 
 
 # 2) Multi-Head Attention
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model=512, h=8):
+    def __init__(self, d_model=512, h=8):       # 모델 차원 512, 헤드 수 8개로 초기화
         super().__init__()
         self.h = h
-        self.d_k = d_model // h     # 64
+        self.d_k = d_model // h                 # 각 헤드가 담당할 차원은 512/8 = 64
         self.W_q = nn.Linear(d_model, d_model)
         self.W_k = nn.Linear(d_model, d_model)
         self.W_v = nn.Linear(d_model, d_model)
-        self.W_o = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)  # Q, K, V를 만들기 위한 선형 투영 3개와, 헤드들을 합친 뒤 적용할 출력 투영 1개를 준비
 
-    def forward(self, Q, K, V, mask=None):
+    def forward(self, Q, K, V, mask=None):      # 배치 크기를 가져옴
         B = Q.size(0)
+        
         # (B, seq, d_model) -> (B, h, seq, d_k)  [헤드 분할]
+        # 선형변환 후 (B, seq, d_model) → (B, seq, h, d_k)로 reshape 하고, transpose로 (B, h, seq, d_k) 모양으로 만듦
+        # 이렇게 하면 헤드 차원이 앞으로 와서 헤드별로 독립적인 attention을 병렬 계산할 수 있음
         Q = self.W_q(Q).view(B, -1, self.h, self.d_k).transpose(1, 2)
         K = self.W_k(K).view(B, -1, self.h, self.d_k).transpose(1, 2)
         V = self.W_v(V).view(B, -1, self.h, self.d_k).transpose(1, 2)
+        
+        # 각 헤드별로 attention을 계산
         out = scaled_dot_product_attention(Q, K, V, mask)
+        
         # 다시 합치기
+        # (B, h, seq, d_k)를 다시 (B, seq, h, d_k)로 되돌리고, 마지막 두 축을 합쳐 (B, seq, d_model)로 만
         out = out.transpose(1, 2).contiguous().view(B, -1, self.h * self.d_k)
-        return self.W_o(out)
+        return self.W_o(out)        # 헤드들을 합친 결과에 출력 투영을 적용해 반환
 
 
 # 3) Positional Encoding
