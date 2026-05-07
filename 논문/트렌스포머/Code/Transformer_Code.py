@@ -71,6 +71,7 @@ class PositionalEncoding(nn.Module):
 
 
 # 4) Feed-Forward Network
+# 512 → 2048 → 512로 차원을 늘렸다 줄이는 2층 FFN
 class FeedForward(nn.Module):
     def __init__(self, d_model=512, d_ff=2048):
         super().__init__()
@@ -80,11 +81,13 @@ class FeedForward(nn.Module):
             nn.Linear(d_ff, d_model),
         )
 
+    # 순서대로 통과
     def forward(self, x):
         return self.net(x)
 
 
 # 5) Encoder Layer (한 층)
+# 한 층을 구성하는 부품: self-attention, FFN, LayerNorm 2개, Dropout
 class EncoderLayer(nn.Module):
     def __init__(self, d_model=512, h=8, d_ff=2048, dropout=0.1):
         super().__init__()
@@ -96,12 +99,17 @@ class EncoderLayer(nn.Module):
 
     def forward(self, x, mask=None):
         # 잔차 연결 + LayerNorm
+        # self-attention(Q=K=V=x)을 돌리고, dropout 적용 후 잔차 연결(x + ...)과 LayerNorm을 거침
         x = self.norm1(x + self.dropout(self.attn(x, x, x, mask)))
+
+        # FFN에도 같은 패턴(잔차 + 정규화)을 적용하고 반환
         x = self.norm2(x + self.dropout(self.ffn(x)))
         return x
 
 
 # 6) Decoder Layer (한 층)
+# 디코더는 attention이 두 개라 LayerNorm도 3개
+#  첫 attention은 미래를 보지 못하게 마스킹하는 self-attention, 두 번째는 인코더 출력을 보는 cross-attention
 class DecoderLayer(nn.Module):
     def __init__(self, d_model=512, h=8, d_ff=2048, dropout=0.1):
         super().__init__()
@@ -113,10 +121,17 @@ class DecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
+    # 디코더 입력으로 self-attention을 돌림
+    # tgt_mask로 미래 토큰을 가림
     def forward(self, x, enc_out, src_mask=None, tgt_mask=None):
         x = self.norm1(x + self.dropout(self.self_attn(x, x, x, tgt_mask)))
+        
         # Q는 디코더, K/V는 인코더 출력
+        # Q는 디코더(x)에서, K/V는 인코더 출력(enc_out)에서 가져옴
+        # 즉 디코더가 인코더 정보를 "참조"하는 단계 (src_mask는 인코더 쪽 패딩을 가림)
         x = self.norm2(x + self.dropout(self.cross_attn(x, enc_out, enc_out, src_mask)))
+
+        # 마지막으로 FFN + 잔차 + 정규화 후 반환
         x = self.norm3(x + self.dropout(self.ffn(x)))
         return x
 
