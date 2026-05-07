@@ -44,17 +44,28 @@ class MultiHeadAttention(nn.Module):
 
 
 # 3) Positional Encoding
-class PositionalEncoding(nn.Module):
+# 최대 길이 5000, 차원 512짜리 위치 인코딩 행렬을 0으로 초기화
+class PositionalEncoding(nn.Module):               
     def __init__(self, d_model=512, max_len=5000):
         super().__init__()
         pe = torch.zeros(max_len, d_model)
+
+        # 0부터 4999까지의 위치 인덱스를 (5000, 1) 모양으로 만듦
         pos = torch.arange(0, max_len).unsqueeze(1).float()
+
+        # 논문 공식의 분모 10000^(2i/d_model)을 계산
         div = torch.exp(torch.arange(0, d_model, 2).float() *
                         -(math.log(10000.0) / d_model))
+
+        # 짝수 차원에는 sin, 홀수 차원에는 cos 값을 채움
+        # 이렇게 하면 위치마다 고유한 패턴이 생기고, 상대적 위치 관계도 학습할 수 있게 됨
         pe[:, 0::2] = torch.sin(pos * div)   # 짝수 차원
         pe[:, 1::2] = torch.cos(pos * div)   # 홀수 차원
-        self.register_buffer('pe', pe.unsqueeze(0))
 
+        # 배치 차원을 추가해 (1, max_len, d_model)로 만들고 buffer로 등록
+        self.register_buffer('pe', pe.unsqueeze(0))
+        
+    # 입력 시퀀스 길이만큼 잘라서 그대로 더함
     def forward(self, x):
         return x + self.pe[:, :x.size(1)]
 
